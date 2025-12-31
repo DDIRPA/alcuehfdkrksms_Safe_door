@@ -1,0 +1,69 @@
+========================================
+Safe Door Website - Tablet Access Guide
+========================================
+
+[STEP BY STEP INSTRUCTIONS]
+
+STEP 1: Start the Server on PC
+-------------------------------
+1. Double-click "태블릿_실행.bat" file on your PC
+   (or "start_tablet.bat" if you have Python installed)
+
+2. Wait for the server to start. You will see:
+   "Server started successfully!"
+   
+3. Look for the IP address shown on screen, for example:
+   "http://192.168.1.100:8000/index_standalone.html"
+
+
+STEP 2: Check Wi-Fi Connection
+-------------------------------
+1. Make sure your PC and tablet are connected to the SAME Wi-Fi network
+   (They must be on the same wireless network)
+
+
+STEP 3: Access from Tablet
+---------------------------
+1. Open a web browser on your tablet (Chrome, Safari, etc.)
+
+2. Type the IP address shown in STEP 1 into the browser address bar
+   Example: http://192.168.1.100:8000/index_standalone.html
+   
+3. Press Enter or tap Go
+
+4. The Safe Door website should now load on your tablet!
+
+
+[IMPORTANT NOTES]
+
+- The server must be running on the PC for the tablet to access it
+- Both devices must be on the same Wi-Fi network
+- To stop the server, press Ctrl+C in the PC server window
+- If you can't access, check Windows Firewall settings (port 8000)
+
+
+[TROUBLESHOOTING]
+
+Problem: Cannot access from tablet
+Solution:
+  1. Check if PC and tablet are on the same Wi-Fi
+  2. Check Windows Firewall settings
+  3. Try restarting the server with Administrator privileges
+
+Problem: IP address not shown
+Solution:
+  1. Check your network connection
+  2. Try using "localhost" instead (only works from the same PC)
+
+Problem: Server start error
+Solution:
+  1. Run PowerShell as Administrator
+  2. Or run this command in Administrator PowerShell:
+     netsh http add urlacl url=http://+:8000/ user=YOUR_USERNAME
+
+
+[EXAMPLE]
+
+PC IP Address: 192.168.1.100
+Tablet Browser URL: http://192.168.1.100:8000/index_standalone.html
+

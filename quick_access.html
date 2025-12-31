@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Safe Door - Quick Access</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        button:active {
+            transform: scale(0.98);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+        
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+        
+        .info-box {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 4px;
+            text-align: left;
+        }
+        
+        .info-box p {
+            color: #666;
+            font-size: 13px;
+            line-height: 1.6;
+            margin-bottom: 5px;
+        }
+        
+        .info-box strong {
+            color: #333;
+        }
+        
+        .qr-section {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .qr-code {
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            display: inline-block;
+        }
+        
+        .instructions {
+            margin-top: 20px;
+            text-align: left;
+            font-size: 13px;
+            color: #666;
+        }
+        
+        .instructions ol {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚪 Safe Door</h1>
+        <p class="subtitle">Quick Access Link Generator</p>
+        
+        <div class="input-group">
+            <label for="ip-address">PC IP Address (from server window):</label>
+            <input type="text" id="ip-address" placeholder="192.168.1.100" value="">
+        </div>
+        
+        <div class="button-group">
+            <button class="btn-primary" onclick="generateLink()">Generate Link</button>
+            <button class="btn-secondary" onclick="openLink()">Open Website</button>
+        </div>
+        
+        <div class="info-box" id="link-box" style="display: none;">
+            <p><strong>Access URL:</strong></p>
+            <p id="generated-link" style="word-break: break-all; color: #667eea; font-weight: 600; margin-top: 5px;"></p>
+            <button class="btn-secondary" onclick="copyLink()" style="margin-top: 10px; width: 100%; padding: 10px;">Copy Link</button>
+        </div>
+        
+        <div class="info-box">
+            <p><strong>Instructions:</strong></p>
+            <div class="instructions">
+                <ol>
+                    <li>Run "태블릿_실행.bat" on your PC</li>
+                    <li>Copy the IP address shown in the server window</li>
+                    <li>Paste it in the input field above</li>
+                    <li>Click "Generate Link"</li>
+                    <li>Use the generated link on your tablet</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Check if IP is in localStorage
+        const savedIP = localStorage.getItem('safeDoorIP');
+        if (savedIP) {
+            document.getElementById('ip-address').value = savedIP;
+        }
+        
+        function generateLink() {
+            const ip = document.getElementById('ip-address').value.trim();
+            if (!ip) {
+                alert('Please enter IP address');
+                return;
+            }
+            
+            // Save IP to localStorage
+            localStorage.setItem('safeDoorIP', ip);
+            
+            const link = `http://${ip}:8000/index_standalone.html`;
+            document.getElementById('generated-link').textContent = link;
+            document.getElementById('link-box').style.display = 'block';
+            localStorage.setItem('safeDoorLink', link);
+        }
+        
+        function openLink() {
+            const savedLink = localStorage.getItem('safeDoorLink');
+            const ip = document.getElementById('ip-address').value.trim();
+            
+            let link;
+            if (savedLink) {
+                link = savedLink;
+            } else if (ip) {
+                link = `http://${ip}:8000/index_standalone.html`;
+            } else {
+                alert('Please generate link first');
+                return;
+            }
+            
+            window.open(link, '_blank');
+        }
+        
+        function copyLink() {
+            const linkText = document.getElementById('generated-link').textContent;
+            navigator.clipboard.writeText(linkText).then(() => {
+                alert('Link copied to clipboard!');
+            }).catch(() => {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = linkText;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                alert('Link copied to clipboard!');
+            });
+        }
+        
+        // Auto-generate link if IP is saved
+        window.addEventListener('load', () => {
+            const savedIP = localStorage.getItem('safeDoorIP');
+            if (savedIP) {
+                document.getElementById('ip-address').value = savedIP;
+                generateLink();
+            }
+        });
+    </script>
+</body>
+</html>
+

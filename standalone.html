@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Safe Door</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .page {
+            display: none;
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+            flex-direction: column;
+        }
+
+        .page.active {
+            display: flex;
+        }
+
+        /* 공통 배경 스타일 */
+        .page::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 80%;
+            height: 150%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.8) 0%, rgba(255, 200, 200, 0.3) 50%, transparent 100%);
+            border-radius: 50%;
+            z-index: 0;
+        }
+
+        .page::after {
+            content: '';
+            position: absolute;
+            bottom: -30%;
+            left: -10%;
+            width: 60%;
+            height: 80%;
+            background: radial-gradient(circle, rgba(200, 220, 255, 0.6) 0%, transparent 70%);
+            border-radius: 50%;
+            z-index: 0;
+        }
+
+        .header {
+            position: relative;
+            z-index: 1;
+            padding: 20px 30px;
+        }
+
+        .app-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #000;
+            margin: 0;
+        }
+
+        .content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            position: relative;
+            z-index: 1;
+            gap: 30px;
+        }
+
+        #main-page .content {
+            flex-direction: row !important;
+            align-items: flex-start !important;
+            justify-content: space-between !important;
+            padding: 30px 50px !important;
+            gap: 50px !important;
+        }
+
+        .footer {
+            position: relative;
+            z-index: 1;
+            padding: 20px 30px;
+        }
+
+        .current-time {
+            font-size: 16px;
+            color: #000;
+            margin: 0;
+        }
+
+        /* 메인 페이지 스타일 */
+        #main-page .main-left-section {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            flex: 0 0 auto !important;
+            width: 35% !important;
+            padding-top: 20px !important;
+        }
+
+        #main-page .safety-equipment-demo {
+            flex: 1 !important;
+            display: flex !important;
+            justify-content: center !important;
+            align-items: flex-start !important;
+            width: 60% !important;
+            padding-right: 20px !important;
+        }
+
+        .main-instruction {
+            font-size: 36px;
+            font-weight: bold;
+            color: #000;
+            margin-bottom: 15px;
+            text-align: left;
+            line-height: 1.3;
+        }
+
+        .sub-instruction {
+            font-size: 24px;
+            color: #000;
+            text-align: left;
+            margin-bottom: 40px;
+            line-height: 1.4;
+        }
+
+        .main-left-section {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            flex: 0 0 auto;
+            width: 35%;
+            padding-top: 20px;
+        }
+
+        .confirm-button, .back-button, .page-button, .login-button, .action-button {
+            background-color: #000;
+            color: #fff;
+            border: none;
+            padding: 15px 60px;
+            font-size: 20px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .confirm-button:hover, .back-button:hover, .page-button:hover, .login-button:hover, .action-button:hover {
+            background-color: #333;
+        }
+
+        .safety-equipment-demo {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            width: 60%;
+            padding-right: 20px;
+        }
+
+        .demo-image-container {
+            text-align: center;
+            width: 100%;
+            position: relative;
+        }
+
+        .demo-title {
+            font-size: 36px;
+            font-weight: bold;
+            color: #ff6600;
+            margin-bottom: 30px;
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        .demo-image {
+            width: 100%;
+            max-width: 550px;
+            height: 650px;
+            background: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 100%);
+            border-radius: 20px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin: 0 auto;
+            overflow: visible;
+        }
+
+        .worker-figure {
+            width: 250px;
+            height: 450px;
+            background: linear-gradient(180deg, #4a90e2 0%, #357abd 100%);
+            border-radius: 120px 120px 30px 30px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding-top: 30px;
+        }
+
+        .safety-item {
+            position: absolute;
+            border: 3px solid #ff8c00;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #ff6600;
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .safety-item.helmet {
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 140px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .safety-item.harness {
+            top: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 160px;
+            height: 220px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 200, 0, 0.3);
+            border-color: #00cc00;
+        }
+
+        .safety-item.shoes {
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 55px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.9);
+            border-color: #333;
+            color: #fff;
+        }
+
+        .admin-password-input {
+            background-color: #000;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .admin-password-input:hover {
+            background-color: #333;
+        }
+
+        /* 로그인 페이지 */
+        .main-heading {
+            font-size: 36px;
+            font-weight: bold;
+            color: #000;
+            margin: 0;
+            text-align: center;
+        }
+
+        .instruction {
+            font-size: 20px;
+            color: #000;
+            margin: 0;
+            text-align: center;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .form-group {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .form-group label {
+            font-size: 20px;
+            color: #000;
+            font-weight: 500;
+            min-width: 100px;
+        }
+
+        .password-input {
+            flex: 1;
+            padding: 15px 20px;
+            font-size: 20px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            background-color: #fff;
+            outline: none;
+        }
+
+        .password-input:focus {
+            border-color: #4a90e2;
+        }
+
+        /* 메시지 페이지 */
+        .message-title {
+            font-size: 42px;
+            font-weight: bold;
+            color: #000;
+            margin-bottom: 20px;
+            line-height: 1.4;
+            text-align: center;
+        }
+
+        .message-title.error {
+            color: #dc3545;
+        }
+
+        .message-subtitle {
+            font-size: 28px;
+            color: #000;
+            margin: 0;
+            line-height: 1.4;
+            text-align: center;
+        }
+
+        .message-subtitle.error {
+            color: #dc3545;
+        }
+
+        /* 출입기록 페이지 */
+        .header-left {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .page-title {
+            font-size: 36px;
+            font-weight: bold;
+            color: #000;
+            margin: 0;
+        }
+
+        .records-table {
+            width: 100%;
+            max-width: 1200px;
+            border-collapse: collapse;
+            background-color: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .records-table thead {
+            background-color: #f0f0f0;
+        }
+
+        .records-table th {
+            padding: 20px;
+            text-align: left;
+            font-size: 20px;
+            font-weight: bold;
+            color: #000;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .records-table td {
+            padding: 20px;
+            text-align: left;
+            font-size: 18px;
+            color: #000;
+            border-bottom: 1px solid #eee;
+        }
+
+        .pagination {
+            position: relative;
+            z-index: 1;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .page-button:disabled {
+            background-color: #666;
+            cursor: not-allowed;
+        }
+
+        .page-number {
+            font-size: 20px;
+            font-weight: bold;
+            color: #000;
+        }
+
+        /* 대시보드 (관리자 페이지) */
+        .dashboard-header {
+            position: relative;
+            z-index: 1;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .dashboard-content {
+            flex: 1;
+            padding: 20px 30px;
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            overflow-y: auto;
+        }
+
+        .welcome-text {
+            font-size: 20px;
+            color: #000;
+            margin: 0;
+        }
+
+        .section-title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #000;
+            margin: 0;
+        }
+
+        .map-container {
+            flex: 1;
+            min-height: 400px;
+            background: linear-gradient(135deg, #e8f4f8 0%, #d4e8f0 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .map-placeholder {
+            text-align: center;
+            color: #666;
+            z-index: 1;
+        }
+
+        .map-placeholder p {
+            font-size: 24px;
+            margin: 10px 0;
+        }
+
+        .map-subtitle {
+            font-size: 16px;
+            color: #999;
+        }
+
+        .bottom-section {
+            display: flex;
+            gap: 30px;
+            padding: 20px 0;
+            width: 100%;
+        }
+
+        .stats-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .stat-label {
+            font-size: 18px;
+            color: #000;
+            font-weight: 500;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            color: #000;
+            font-weight: bold;
+        }
+
+        .actions-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: flex-end;
+        }
+
+        .logo-section {
+            text-align: right;
+        }
+
+        .logo {
+            font-size: 48px;
+            font-weight: bold;
+            color: #000;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+            line-height: 1.2;
+        }
+
+        .logo::after {
+            content: '';
+            display: block;
+            width: 0;
+            height: 0;
+        }
+
+        .school-name {
+            font-size: 14px;
+            color: #000;
+            margin: 5px 0;
+            line-height: 1.4;
+        }
+
+        .school-name-en {
+            font-size: 12px;
+            color: #666;
+            margin: 5px 0;
+            line-height: 1.4;
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .action-button.emergency {
+            background-color: #dc3545;
+        }
+
+        .action-button.emergency:hover {
+            background-color: #c82333;
+        }
+
+        .logout-button {
+            background-color: #000;
+            color: #fff;
+            border: none;
+            padding: 12px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .logout-button:hover {
+            background-color: #333;
+        }
+    </style>
+</head>
+<body>
+    <!-- 메인 페이지 -->
+    <div id="main-page" class="page active">
+        <div class="header">
+            <h1 class="app-title">Safe Door</h1>
+        </div>
+        <div class="content" style="display: flex; flex-direction: row; align-items: flex-start; justify-content: space-between; padding: 30px 50px; gap: 50px;">
+            <div class="main-left-section" style="display: flex; flex-direction: column; align-items: flex-start; width: 35%; padding-top: 20px;">
+                <div style="margin-bottom: 30px;">
+                    <h2 class="main-instruction" style="font-size: 36px; font-weight: bold; color: #000; margin-bottom: 15px; text-align: left;">장구 착용 여부를 확인합니다.</h2>
+                    <p class="sub-instruction" style="font-size: 24px; color: #000; text-align: left; margin-bottom: 40px;">카메라 앞에 서 주십시오.</p>
+                </div>
+                <button class="confirm-button" onclick="handleSafetyCheck()" style="margin-top: 20px; background-color: #000; color: #fff; border: none; padding: 15px 60px; font-size: 20px; font-weight: bold; border-radius: 8px; cursor: pointer;">확인</button>
+            </div>
+            <div class="safety-equipment-demo" style="flex: 1; display: flex; justify-content: center; align-items: flex-start; width: 60%; padding-right: 20px;">
+                <div class="demo-image-container" style="text-align: center; width: 100%; position: relative;">
+                    <h3 class="demo-title" style="font-size: 36px; font-weight: bold; color: #ff6600; margin-bottom: 30px; text-align: center;">안전장구 착용</h3>
+                    <div class="demo-image" style="width: 100%; max-width: 550px; height: 650px; background: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 100%); border-radius: 20px; position: relative; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); margin: 0 auto; overflow: visible;">
+                        <div class="worker-figure" style="width: 250px; height: 450px; background: linear-gradient(180deg, #4a90e2 0%, #357abd 100%); border-radius: 120px 120px 30px 30px; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 30px;">
+                            <div class="safety-item helmet" style="position: absolute; top: -40px; left: 50%; transform: translateX(-50%); width: 140px; height: 45px; display: flex; align-items: center; justify-content: center; border: 3px solid #ff8c00; border-radius: 8px; padding: 8px 12px; font-size: 16px; font-weight: bold; color: #ff6600; background: rgba(255, 255, 255, 0.95); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);">
+                                <span>안전모</span>
+                            </div>
+                            <div class="safety-item harness" style="position: absolute; top: 100px; left: 50%; transform: translateX(-50%); width: 160px; height: 220px; display: flex; align-items: center; justify-content: center; border: 3px solid #00cc00; border-radius: 8px; padding: 8px 12px; font-size: 16px; font-weight: bold; color: #ff6600; background: rgba(0, 200, 0, 0.3); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);">
+                                <span>안전대</span>
+                            </div>
+                            <div class="safety-item shoes" style="position: absolute; bottom: -25px; left: 50%; transform: translateX(-50%); width: 120px; height: 55px; display: flex; align-items: center; justify-content: center; border: 3px solid #333; border-radius: 8px; padding: 8px 12px; font-size: 16px; font-weight: bold; color: #fff; background: rgba(0, 0, 0, 0.9); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);">
+                                <span>안전화</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div style="position: relative; z-index: 1; width: 100%; padding: 20px 50px;">
+            <div class="admin-password-input" onclick="showPage('admin-login')" style="margin-bottom: 15px;">
+                관리자 비밀번호 입력
+            </div>
+            <button class="confirm-button" onclick="showPage('dashboard')" style="width: 100%; max-width: 600px;">
+                관리자 페이지
+            </button>
+        </div>
+        <div class="footer">
+            <p class="current-time" id="main-time"></p>
+        </div>
+    </div>
+
+    <!-- 관리자 로그인 페이지 -->
+    <div id="admin-login" class="page">
+        <div class="header">
+            <h1 class="app-title">Safe Door</h1>
+        </div>
+        <div class="content">
+            <h2 class="main-heading">관리자 비밀번호 입력</h2>
+            <p class="instruction">관리자 비밀번호를 입력하여 주십시오.</p>
+            <form class="login-form" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label for="password">비밀번호</label>
+                    <input type="password" id="password" class="password-input" autofocus>
+                </div>
+                <button type="submit" class="login-button">로그인</button>
+            </form>
+        </div>
+        <div class="footer">
+            <p class="current-time" id="login-time"></p>
+        </div>
+    </div>
+
+    <!-- 안전장구 확인 성공 -->
+    <div id="safety-success" class="page">
+        <div class="header">
+            <h1 class="app-title">Safe Door</h1>
+        </div>
+        <div class="content">
+            <div>
+                <h2 class="message-title">장구 착용이 확인되었습니다.</h2>
+                <p class="message-subtitle">입장하여 주십시오.</p>
+            </div>
+        </div>
+        <div class="footer">
+            <p class="current-time" id="success-time"></p>
+        </div>
+    </div>
+
+    <!-- 안전장구 확인 실패 -->
+    <div id="safety-failed" class="page">
+        <div class="header">
+            <h1 class="app-title">Safe Door</h1>
+        </div>
+        <div class="content">
+            <div>
+                <h2 class="message-title error">장구 착용이 확인되지 않았습니다!</h2>
+                <p class="message-subtitle error">장구를 적절히 착용하시고 재시도하여 주십시오.</p>
+            </div>
+        </div>
+        <div class="footer">
+            <p class="current-time" id="failed-time"></p>
+        </div>
+    </div>
+
+    <!-- 비밀번호 오류 -->
+    <div id="password-error" class="page">
+        <div class="header">
+            <h1 class="app-title">Safe Door</h1>
+        </div>
+        <div class="content">
+            <div>
+                <h2 class="message-title error">관리자 비밀번호가 일치하지 않습니다!</h2>
+                <p class="message-subtitle error">다시 입력하여 주십시오.</p>
+            </div>
+        </div>
+        <div class="footer">
+            <p class="current-time" id="error-time"></p>
+        </div>
+    </div>
+
+    <!-- 대시보드 (관리자 페이지) -->
+    <div id="dashboard" class="page">
+        <div class="dashboard-header">
+            <div class="header-left">
+                <h1 class="app-title">Safe Door</h1>
+                <p class="welcome-text">환영합니다 000님</p>
+                <h2 class="section-title">지도</h2>
+            </div>
+            <button class="logout-button" onclick="showPage('main-page')">로그아웃</button>
+        </div>
+        <div class="dashboard-content">
+            <div class="map-container">
+                <div class="map-placeholder">
+                    <p>지도 영역</p>
+                    <p class="map-subtitle">공사장 위치 정보</p>
+                </div>
+            </div>
+            <div class="bottom-section">
+                <div class="stats-section">
+                    <div class="stat-item">
+                        <span class="stat-label">공사장 내 총 인원</span>
+                        <span class="stat-value">00명</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">안전 장구 불량 착용자</span>
+                        <span class="stat-value">00명</span>
+                    </div>
+                </div>
+                <div class="actions-section">
+                    <div class="logo-section">
+                        <div class="logo">GAT</div>
+                        <p class="school-name">광주자동화설비마이스터고등학교</p>
+                        <p class="school-name-en">GWANGJU AUTOMATIC EQUIPMENT TEC. MEISTER HIGH SCHOOL</p>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="action-button" onclick="showPage('access-records')">출입기록 확인</button>
+                        <button class="action-button emergency" onclick="handleEmergencyOpen()">비상개방</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer">
+            <p class="current-time" id="dashboard-time"></p>
+        </div>
+    </div>
+
+    <!-- 출입기록 -->
+    <div id="access-records" class="page">
+        <div class="header">
+            <div class="header-left">
+                <h1 class="app-title">Safe Door</h1>
+                <h2 class="page-title">출입기록</h2>
+            </div>
+            <button class="back-button" onclick="showPage('dashboard')">돌아가기</button>
+        </div>
+        <div class="content" style="justify-content: flex-start; overflow-y: auto;">
+            <table class="records-table">
+                <thead>
+                    <tr>
+                        <th>출입인원</th>
+                        <th>시간</th>
+                        <th>입/퇴여부</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>작업자A</td>
+                        <td>2025-12-01 08:32:05</td>
+                        <td>입장</td>
+                    </tr>
+                    <tr>
+                        <td>작업자A</td>
+                        <td>2025-12-01 17:32:35</td>
+                        <td>퇴장</td>
+                    </tr>
+                    <tr><td></td><td></td><td></td></tr>
+                    <tr><td></td><td></td><td></td></tr>
+                    <tr><td></td><td></td><td></td></tr>
+                    <tr><td></td><td></td><td></td></tr>
+                    <tr><td></td><td></td><td></td></tr>
+                    <tr><td></td><td></td><td></td></tr>
+                    <tr><td></td><td></td><td></td></tr>
+                    <tr><td></td><td></td><td></td></tr>
+                    <tr><td></td><td></td><td></td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="pagination">
+            <button class="page-button" onclick="changePage(-1)">이전 페이지</button>
+            <span class="page-number">페이지 1</span>
+            <button class="page-button" onclick="changePage(1)">다음 페이지</button>
+        </div>
+        <div class="footer">
+            <p class="current-time" id="records-time"></p>
+        </div>
+    </div>
+
+    <script>
+        // 페이지 전환 함수
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            document.getElementById(pageId).classList.add('active');
+        }
+
+        // 시간 포맷 함수
+        function formatDateTime(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+            return `${year}.${month}.${day} ${hours}:${minutes}:${seconds}`;
+        }
+
+        // 시간 업데이트
+        function updateTime() {
+            const now = new Date();
+            const timeString = formatDateTime(now);
+            document.querySelectorAll('.current-time').forEach(el => {
+                if (el.parentElement.parentElement.classList.contains('active')) {
+                    el.textContent = `현재시각 ${timeString}`;
+                }
+            });
+        }
+
+        // 안전장구 확인 처리
+        function handleSafetyCheck() {
+            const isSafetyEquipmentWorn = Math.random() > 0.3; // 70% 확률로 성공
+            if (isSafetyEquipmentWorn) {
+                showPage('safety-success');
+                setTimeout(() => showPage('main-page'), 5000);
+            } else {
+                showPage('safety-failed');
+                setTimeout(() => showPage('main-page'), 5000);
+            }
+        }
+
+        // 로그인 처리
+        function handleLogin(event) {
+            event.preventDefault();
+            const password = document.getElementById('password').value;
+            if (password === 'admin123') {
+                showPage('dashboard');
+            } else {
+                showPage('password-error');
+                setTimeout(() => showPage('admin-login'), 3000);
+            }
+        }
+
+        // 페이지 변경 (출입기록)
+        function changePage(direction) {
+            // 간단한 페이지네이션 로직 (실제로는 서버 데이터 필요)
+            console.log('페이지 변경:', direction);
+        }
+
+        // 비상개방 처리
+        function handleEmergencyOpen() {
+            if (confirm('비상개방을 실행하시겠습니까?')) {
+                alert('비상개방이 실행되었습니다.');
+            }
+        }
+
+        // 초기화
+        setInterval(updateTime, 1000);
+        updateTime();
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,56 @@
+========================================
+How to Use Safe Door Website on Tablet
+========================================
+
+[QUICK GUIDE]
+
+1. Run "태블릿_실행.bat" on your PC
+   -> The server will start and show an IP address
+
+2. On your tablet:
+   -> Open web browser
+   -> Enter the IP address shown on PC (example: http://192.168.1.100:8000/index_standalone.html)
+   -> The website will load!
+
+IMPORTANT: PC and tablet must be on the same Wi-Fi network!
+
+
+[DETAILED INSTRUCTIONS]
+
+--- ON PC ---
+1. Double-click "태블릿_실행.bat"
+2. Wait until you see "Server started successfully!"
+3. Note the IP address shown (e.g., 192.168.1.100)
+4. Keep this window open (don't close it)
+
+--- ON TABLET ---
+1. Make sure tablet is connected to the same Wi-Fi as PC
+2. Open web browser (Chrome, Safari, etc.)
+3. In the address bar, type:
+   http://[IP_ADDRESS]:8000/index_standalone.html
+   
+   Replace [IP_ADDRESS] with the number shown on PC
+   Example: http://192.168.1.100:8000/index_standalone.html
+
+4. Press Enter
+5. The Safe Door website should appear!
+
+
+[STOPPING THE SERVER]
+
+To stop the server on PC:
+- Press Ctrl+C in the server window
+- Or close the window
+
+
+[COMMON ISSUES]
+
+Q: Tablet says "Cannot connect"
+A: Check if PC and tablet are on the same Wi-Fi network
+
+Q: No IP address shown
+A: Check your network connection and restart the server
+
+Q: Server won't start
+A: Try running as Administrator or check firewall settings
+
